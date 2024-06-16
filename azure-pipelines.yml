@@ -1,0 +1,97 @@
+trigger:
+  branches:
+    include:
+      - main
+      - deploy/production
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  IMAGE_NAME: "todos-frontend"
+  DOCKER_REGISTRY_SERVICE_CONNECTION: '<your-docker-service-connection>'
+
+stages:
+  - stage: lint
+    displayName: 'Linting Stage'
+    jobs:
+      - job: lint
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '14.x'
+            displayName: 'Install Node.js'
+          - script: |
+              npm install
+              npm run lint
+            displayName: 'Run Linting'
+
+  - stage: test
+    displayName: 'Testing Stage'
+    jobs:
+      - job: test
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '14.x'
+            displayName: 'Install Node.js'
+          - script: |
+              npm install
+              npm test
+            displayName: 'Run Tests'
+          - task: PublishTestResults@2
+            inputs:
+              testResultsFiles: '**/TEST-*.xml'
+              mergeTestResults: true
+              testRunTitle: 'Frontend Unit Tests'
+
+  - stage: build
+    displayName: 'Build Stage'
+    jobs:
+      - job: build
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '14.x'
+            displayName: 'Install Node.js'
+          - script: |
+              npm install
+              npm run build
+            displayName: 'Build the Application'
+          - task: Docker@2
+            displayName: 'Build Docker Image'
+            inputs:
+              command: 'build'
+              Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
+              containerName: '$(IMAGE_NAME)'
+              tags: '$(Build.BuildId)'
+
+  - stage: deliver
+    displayName: 'Deliver Stage'
+    jobs:
+      - job: deliver
+        steps:
+          - task: Docker@2
+            displayName: 'Login to Docker Hub'
+            inputs:
+              command: 'login'
+              containerRegistry: '$(DOCKER_REGISTRY_SERVICE_CONNECTION)'
+          - task: Docker@2
+            displayName: 'Push Docker Image to Docker Hub'
+            inputs:
+              command: 'push'
+              containerName: '$(IMAGE_NAME)'
+              tags: 'latest'
+
+  - stage: deploy
+    displayName: 'Deploy Stage'
+    jobs:
+      - job: deploy
+        steps:
+          - task: SSH@0
+            displayName: 'SSH into EC2 and deploy'
+            inputs:
+              sshEndpoint: '<your-ssh-service-connection>'
+              runOptions: 'inline'
+              inline: |
+                ssh ubuntu@$AWS_SERVER_IP "~/scripts/deploy.sh"
