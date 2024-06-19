@@ -15,13 +15,12 @@ jobs:
         with:
           node-version: 16.x  # Adjust if needed for your project
 
-      - name: Change directory
-        run: cd ./cicd-frontend-main
-
       - name: Install dependencies
+    working-directory: ./cicd-frontend-main
         run: npm install
 
       - name: Run ESLint
+    working-directory: ./cicd-frontend-main
         run: npm run lint  # Assuming you have ESLint configured in your project
 
   test:
@@ -33,12 +32,11 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16.x
-
-      - name: Change directory
-        run: cd ./cicd-frontend-main
       
       - name: Install dependencies
+    working-directory: ./cicd-frontend-main
         run: npm install
 
       - name: Run tests
+    working-directory: ./cicd-frontend-main
         run: npm run test
