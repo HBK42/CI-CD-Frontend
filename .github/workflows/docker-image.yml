@@ -31,6 +31,9 @@ jobs:
         with:
           node-version: 16.x
 
+      - name: Change directory
+        run: cd ./cicd-frontend-main
+      
       - name: Install dependencies
         run: npm install
 
