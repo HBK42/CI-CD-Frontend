@@ -16,11 +16,11 @@ jobs:
           node-version: 16.x  # Adjust if needed for your project
 
       - name: Install dependencies
-    working-directory: ./cicd-frontend-main
+        working-directory: ./cicd-frontend-main
         run: npm install
 
       - name: Run ESLint
-    working-directory: ./cicd-frontend-main
+        working-directory: ./cicd-frontend-main
         run: npm run lint  # Assuming you have ESLint configured in your project
 
   test:
@@ -34,9 +34,9 @@ jobs:
           node-version: 16.x
       
       - name: Install dependencies
-    working-directory: ./cicd-frontend-main
+        working-directory: ./cicd-frontend-main
         run: npm install
 
       - name: Run tests
-    working-directory: ./cicd-frontend-main
+        working-directory: ./cicd-frontend-main
         run: npm run test
