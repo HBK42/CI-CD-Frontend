@@ -1,0 +1,38 @@
+name: CI/CD Pipeline for Vue.js Project
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3  # Checkout the repository code
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x  # Adjust if needed for your project
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run lint  # Assuming you have ESLint configured in your project
+
+  test:
+    name: Testing
+    needs: lint  # Run tests only after linting succeeds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test
