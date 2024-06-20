@@ -17,7 +17,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: ./cicd-frontend-main
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Run ESLint
         working-directory: ./cicd-frontend-main
@@ -29,13 +29,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
       
       - name: Install dependencies
         working-directory: ./cicd-frontend-main
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: Run tests
         working-directory: ./cicd-frontend-main
