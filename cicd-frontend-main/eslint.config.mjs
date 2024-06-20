@@ -1,5 +1,4 @@
 // eslint.config.js
-import { ESLint } from 'eslint';
 import vue from 'eslint-plugin-vue';
 
 export default [
