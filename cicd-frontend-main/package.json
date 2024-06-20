@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.2.0",
-    "eslint": "^8.0.0",
+    "eslint": "^9.5.0",
     "eslint-plugin-react": "^7.34.3",
     "eslint-plugin-vue": "^9.26.0",
     "vite": "^3.2.4"
@@ -22,10 +22,7 @@
   "eslintConfig": {
     "overrides": [
       {
-        "files": [
-          "**/*.js",
-          "**/*.vue"
-        ],
+        "files": ["**/*.js", "**/*.vue"],
         "processor": "vue/.vue",
         "parserOptions": {
           "ecmaVersion": 2021,
@@ -35,7 +32,8 @@
           "eslint:recommended",
           "plugin:vue/vue3-recommended"
         ],
-        "rules": {},
+        "rules": {
+        },
         "globals": {
           "axios": true,
           "vue": true
