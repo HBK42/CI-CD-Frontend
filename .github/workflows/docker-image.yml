@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3  # Checkout the repository code
+
       - name: Use Node.js 16
         uses: actions/setup-node@v3
         with:
@@ -19,9 +20,13 @@ jobs:
         working-directory: ./cicd-frontend-main
         run: npm install --legacy-peer-deps
 
+      - name: Set executable permissions
+        working-directory: ./cicd-frontend-main
+        run: chmod +x ./node_modules/.bin/eslint
+
       - name: Run ESLint
         working-directory: ./cicd-frontend-main
-        run: npx eslint 'src/**/*.{js,vue}'  # Using npx to ensure local eslint is used
+        run: npx eslint 'src/**/*.{js,vue}'
 
   test:
     name: Testing
@@ -29,11 +34,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Use Node.js 16
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-      
+
       - name: Install dependencies
         working-directory: ./cicd-frontend-main
         run: npm install --legacy-peer-deps
