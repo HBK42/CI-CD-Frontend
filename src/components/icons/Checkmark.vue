@@ -1,18 +1,18 @@
 <template>
-<div class="checkmark">
+  <div class="checkmark">
     <div class="checkmark_circle"></div>
     <div v-if="done" class="checkmark_stem"></div>
     <div v-if="done" class="checkmark_kick"></div>
-</div>
+  </div>
 </template>
 
 <script>
 export default {
-  name: "Checkmark",
+  name: "CheckmarkIcon", // Umbenennen zu "CheckmarkIcon" für mehrwortigen Namen
   props: {
-    done: Boolean
-  }
-}
+    done: Boolean,
+  },
+};
 </script>
 
 <style scoped>

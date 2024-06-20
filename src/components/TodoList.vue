@@ -3,7 +3,7 @@
     <li>
       <TodoInput @new-todo="post" />
     </li>
-    <li v-for="(todo, i) in todos">
+    <li v-for="(todo) in todos" :key="todo.id">
       <Todo :todo="todo"
             @done="done"
             @undone="undone"
@@ -15,15 +15,15 @@
 <script>
 import Todo from "@/components/Todo.vue";
 import TodoInput from "@/components/TodoInput.vue";
-import {createTodo, doneTodo, readTodos, undoneTodo} from "@/api";
+import { createTodo, doneTodo, readTodos, undoneTodo } from "@/api";
 
 export default {
   name: "TodoList",
-  components: {TodoInput, Todo},
+  components: { TodoInput, Todo },
   data() {
     return {
-      todos: []
-    }
+      todos: [],
+    };
   },
   methods: {
     async getAll() {
@@ -42,17 +42,16 @@ export default {
       this.update(id, todo);
     },
     update(id, todo) {
-      this.todos.forEach((value, i) => {
-        if (value.id === id) {
-          this.todos[i] = todo;
-        }
-      });
-    }
+      const index = this.todos.findIndex((t) => t.id === id);
+      if (index !== -1) {
+        this.todos[index] = todo;
+      }
+    },
   },
   created() {
     this.getAll();
-  }
-}
+  },
+};
 </script>
 
 <style scoped>

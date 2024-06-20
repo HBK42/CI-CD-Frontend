@@ -1,29 +1,29 @@
 <template>
-<div class="todo-item" @click="done">
-  <span :class="{done: todo.done}">{{ todo.name }}</span>
-  <Checkmark :done="todo.done" />
-</div>
+  <div class="todo-item" @click="done">
+    <span :class="{done: todo.done}">{{ todo.name }}</span>
+    <Checkmark :done="todo.done" />
+  </div>
 </template>
 
 <script>
 import Checkmark from "@/components/icons/Checkmark.vue";
 
 export default {
-  name: "Todo",
-  components: {Checkmark},
+  name: "TodoItem", // Umbenennen zu "TodoItem" für mehrwortigen Namen
+  components: { Checkmark },
   props: {
-    todo: Object
+    todo: Object,
   },
   methods: {
     done() {
       if (this.todo.done) {
-        this.$emit('undone', this.todo.id);
+        this.$emit("undone", this.todo.id);
       } else {
-        this.$emit('done', this.todo.id);
+        this.$emit("done", this.todo.id);
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
