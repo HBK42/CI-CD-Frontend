@@ -1,25 +1,13 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import path from "path";
-import { fileURLToPath } from "url";
+const { FlatCompat } = require("@eslint/eslintrc");
+const path = require("path");
 
-// Mimic CommonJS variables if not using CommonJS
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Mimic CommonJS variables
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
 const compat = new FlatCompat({
-  baseDirectory: __dirname
+    baseDirectory: __dirname
 });
 
-export default [
-  // Migrate from eslintrc parserOptions
-  ...compat.extends("eslint-config-my-config"),
-  {
-    languageOptions: {
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: "module"
-      }
-    }
-    // ...other configuration
-  }
+module.exports = [
+    ...compat.extends("eslint-config-my-config"),
 ];
