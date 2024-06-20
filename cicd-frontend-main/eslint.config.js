@@ -1,30 +1,25 @@
-module.exports = {
-  parserOptions: {
-    parser: 'babel-eslint', // Use babel-eslint for parsing JavaScript files
-    ecmaVersion: 2021, // Use the latest ECMAScript standard
-    sourceType: 'module', // Allows for the use of imports
-  },
+import { FlatCompat } from "@eslint/eslintrc";
+import path from "path";
+import { fileURLToPath } from "url";
 
-  extends: [
-    'eslint:recommended', // Use the built-in recommended rules from ESLint
-    'plugin:vue/vue3-recommended', // Use ESLint plugin for Vue.js 3 recommended rules
-  ],
+// Mimic CommonJS variables if not using CommonJS
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-  plugins: [
-    'vue', // Vue.js plugin
-  ],
+const compat = new FlatCompat({
+  baseDirectory: __dirname
+});
 
-  rules: {
-    // Add your own custom rules or overrides here
-    // For example:
-    // 'vue/no-multiple-template-root': 'off', // Allow multiple root elements in Vue components
-    // 'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off', // Adjust console rule based on environment
-  },
-
-  // Define global variables for your project (if needed)
-  languageOptions: {
-    globals: {
-      // Define global variables here, e.g., 'myGlobalVar': true
-    },
-  },
-};
+export default [
+  // Migrate from eslintrc parserOptions
+  ...compat.extends("eslint-config-my-config"),
+  {
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: "module"
+      }
+    }
+    // ...other configuration
+  }
+];
