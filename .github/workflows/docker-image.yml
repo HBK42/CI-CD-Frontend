@@ -21,7 +21,7 @@ jobs:
 
       - name: Run ESLint
         working-directory: ./cicd-frontend-main
-        run: npm run lint  # Assuming you have ESLint configured in your project
+        run: npx eslint 'src/**/*.{js,vue}'  # Using npx to ensure local eslint is used
 
   test:
     name: Testing
