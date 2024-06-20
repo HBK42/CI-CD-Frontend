@@ -1,9 +1,11 @@
 module.exports = [
   {
     files: ['**/*.js', '**/*.vue'],
-    parserOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
+    languageOptions: {
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
     },
     plugins: [
       'vue',
