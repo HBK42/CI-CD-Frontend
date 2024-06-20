@@ -9,50 +9,41 @@ jobs:
     name: Linting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3  # Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Use Node.js 16
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x  # Adjust if needed for your project
-
-      - name: Install dependencies
-        working-directory: ./cicd-frontend-main
-        run: |
-          npm cache clean --force
-          rm -rf node_modules
-          npm install --legacy-peer-deps
-
-      - name: Set executable permissions
-        working-directory: ./cicd-frontend-main
-        run: |
-          chmod +x ./node_modules/.bin/eslint
-          ls -l ./node_modules/.bin  # List the files to verify permissions
-
-       - name: Run ESLint
-  working-directory: ./cicd-frontend-main
-  run: npx eslint 'src/**/*.{js,vue}'
-       
-
-
-  test:
-    name: Testing
-    needs: lint  # Run tests only after linting succeeds
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Use Node.js 16
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
 
       - name: Install dependencies
         working-directory: ./cicd-frontend-main
-        run: |
-          npm cache clean --force
-          rm -rf node_modules
-          npm install --legacy-peer-deps
+        run: npm install --legacy-peer-deps
+
+      - name: Set executable permissions for ESLint (if needed)
+        run: chmod +x ./node_modules/.bin/eslint
+
+      - name: Run ESLint
+        working-directory: ./cicd-frontend-main
+        run: npx eslint 'src/**/*.{js,vue}'
+
+  test:
+    name: Testing
+    needs: lint  # Run tests only after linting succeeds
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+
+      - name: Install dependencies
+        working-directory: ./cicd-frontend-main
+        run: npm install --legacy-peer-deps
 
       - name: Run tests
         working-directory: ./cicd-frontend-main
