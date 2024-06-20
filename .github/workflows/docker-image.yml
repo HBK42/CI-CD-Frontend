@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for Vue.js Project
+name: CI/CD Pipeline für Vue.js Projekt
 
 on:
   push:
@@ -6,44 +6,44 @@ on:
 
 jobs:
   lint:
-    name: Linting
+    name: Linten
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3  # Checkout the repository code
+      - uses: actions/checkout@v3  # Repository-Code auschecken
 
-      - name: Use Node.js 16
+      - name: Node.js 16 verwenden
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x  # Adjust if needed for your project
+          node-version: 16.x  # Anpassen, falls nötig für dein Projekt
 
-      - name: Install dependencies
+      - name: Abhängigkeiten installieren
         working-directory: ./cicd-frontend-main
         run: npm install --legacy-peer-deps
 
-      - name: Set executable permissions
+      - name: Ausführbare Berechtigungen setzen
         working-directory: ./cicd-frontend-main
         run: chmod +x ./node_modules/.bin/eslint
 
-      - name: Run ESLint
+      - name: ESLint ausführen
         working-directory: ./cicd-frontend-main
         run: npx eslint 'src/**/*.{js,vue}'
 
   test:
-    name: Testing
-    needs: lint  # Run tests only after linting succeeds
+    name: Testen
+    needs: lint  # Tests nur ausführen, wenn das Linting erfolgreich war
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 16
+      - name: Node.js 16 verwenden
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
 
-      - name: Install dependencies
+      - name: Abhängigkeiten installieren
         working-directory: ./cicd-frontend-main
         run: npm install --legacy-peer-deps
 
-      - name: Run tests
+      - name: Tests ausführen
         working-directory: ./cicd-frontend-main
         run: npm run test
