@@ -29,7 +29,7 @@ jobs:
           
       - name: Linting
         run: |
-         C:\Users\Hasan\Documents\GitHub\CI-CD-Frontend\eslint.config.js
+         eslint --config ./eslint.config.js
 
       - name: Testing
         run: |
