@@ -1,24 +1,24 @@
-export default {
-  overrides: [
-    {
-      files: ['**/*.js', '**/*.vue'],
-      processor: 'vue/.vue',
-      parserOptions: {
-        ecmaVersion: 2021,
-        sourceType: 'module',
-      },
-      extends: [
-        'eslint:recommended',
-        'plugin:vue/vue3-recommended'
-      ],
-      rules: {
-        // Fügen Sie benutzerdefinierte Regeln hinzu, falls benötigt
-      },
+module.exports = [
+  {
+    files: ['**/*.js', '**/*.vue'],
+    processor: 'vue/.vue',
+    languageOptions: {
+      ecmaVersion: 2021,
+      sourceType: 'module',
       globals: {
-        // Definieren Sie globale Variablen hier, falls benötigt
         axios: true,
         vue: true,
       },
     },
-  ],
-};
+    plugins: {
+      vue: require('eslint-plugin-vue'),
+    },
+    rules: {
+      // Fügen Sie benutzerdefinierte Regeln hinzu, falls benötigt
+    },
+    extends: [
+      'eslint:recommended',
+      'plugin:vue/vue3-recommended'
+    ],
+  },
+];
