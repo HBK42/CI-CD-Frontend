@@ -24,22 +24,20 @@
       {
         "files": ["**/*.js", "**/*.vue"],
         "processor": "vue/.vue",
-        "languageOptions": {
-          "globals": {
-            "axios": true,
-            "vue": true
-          }
+        "parserOptions": {
+          "ecmaVersion": 2021,
+          "sourceType": "module"
         },
         "extends": [
           "eslint:recommended",
           "plugin:vue/vue3-recommended"
         ],
-        "parserOptions": {
-          "ecmaVersion": 2021,
-          "sourceType": "module"
-        },
         "rules": {
+        },
+        "globals": {
           
+          "axios": true,
+          "vue": true
         }
       }
     ]
