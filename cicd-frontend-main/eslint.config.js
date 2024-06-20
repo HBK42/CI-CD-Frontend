@@ -1,9 +1,8 @@
-import eslintPluginVue from 'eslint-plugin-vue';
+import vue from 'eslint-plugin-vue';
 
 export default [
   {
     files: ['**/*.js', '**/*.vue'],
-    processor: 'vue/.vue',
     languageOptions: {
       ecmaVersion: 2021,
       sourceType: 'module',
@@ -13,14 +12,15 @@ export default [
       },
     },
     plugins: {
-      vue: eslintPluginVue,
+      vue,
     },
+    processor: 'vue/.vue',
+    extends: [
+      'eslint:recommended',
+      'plugin:vue/vue3-recommended',
+    ],
     rules: {
       // Fügen Sie benutzerdefinierte Regeln hinzu, falls benötigt
     },
-    extends: [
-      'eslint:recommended',
-      'plugin:vue/vue3-recommended'
-    ],
   },
 ];
