@@ -29,9 +29,10 @@ jobs:
           chmod +x ./node_modules/.bin/eslint
           ls -l ./node_modules/.bin  # List the files to verify permissions
 
-      - name: Run ESLint
-        working-directory: ./cicd-frontend-main
-        run: npx eslint 'src/**/*.{js,vue}'
+       - name: Run ESLint
+  working-directory: ./cicd-frontend-main
+  run: npx eslint 'src/**/*.{js,vue}'
+       
 
 
   test:
