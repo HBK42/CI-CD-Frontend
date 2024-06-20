@@ -1,5 +1,4 @@
 module.exports = {
-  root: true, // Make sure ESLint picks up the config at the root of the directory
 
   env: {
     node: true, // This allows the use of Node.js global variables and Node.js scoping
