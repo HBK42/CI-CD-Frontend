@@ -1,9 +1,4 @@
 module.exports = {
-
-  env: {
-    node: true, // This allows the use of Node.js global variables and Node.js scoping
-  },
-
   parserOptions: {
     parser: 'babel-eslint', // Use babel-eslint for parsing JavaScript files
     ecmaVersion: 2021, // Use the latest ECMAScript standard
@@ -15,10 +10,21 @@ module.exports = {
     'plugin:vue/vue3-recommended', // Use ESLint plugin for Vue.js 3 recommended rules
   ],
 
+  plugins: [
+    'vue', // Vue.js plugin
+  ],
+
   rules: {
     // Add your own custom rules or overrides here
     // For example:
     // 'vue/no-multiple-template-root': 'off', // Allow multiple root elements in Vue components
     // 'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off', // Adjust console rule based on environment
+  },
+
+  // Define global variables for your project (if needed)
+  languageOptions: {
+    globals: {
+      // Define global variables here, e.g., 'myGlobalVar': true
+    },
   },
 };
