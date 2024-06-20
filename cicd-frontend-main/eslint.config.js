@@ -13,6 +13,7 @@ module.exports = {
     'eslint:recommended',
     'plugin:vue/vue3-essential',
     'plugin:react/recommended',
+    // Add other configurations you want to extend from directly
   ],
   rules: {
     // Add your custom rules here
