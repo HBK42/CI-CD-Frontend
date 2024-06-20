@@ -7,9 +7,11 @@ module.exports = [
         sourceType: 'module',
       },
     },
-    plugins: [
-      'vue',
-    ],
+    plugins: {
+      vue: {
+        // Konfiguration für das Vue-Plugin hier angeben, falls erforderlich
+      },
+    },
     rules: {
       'vue/multi-word-component-names': 'off',
       // Weitere Regeln hinzufügen, falls erforderlich
