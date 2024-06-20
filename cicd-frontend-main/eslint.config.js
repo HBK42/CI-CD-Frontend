@@ -1,17 +1,19 @@
 module.exports = {
-  files: ['**/*.js', '**/*.vue'],
-  languageOptions: {
+  env: {
+    browser: true,
+    es2021: true,
+    jest: true,
+  },
+  overrides: [],
+  parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  plugins: {
-    vue: require('eslint-plugin-vue'),
-  },
-  extends: [
-    'eslint:recommended',
-    'plugin:vue/essential',
+  plugins: [
+    'vue',
   ],
   rules: {
-    // Add custom rules here
+    'vue/multi-word-component-names': 'off',
+    // Weitere Regeln hinzufügen, falls erforderlich
   },
 };
