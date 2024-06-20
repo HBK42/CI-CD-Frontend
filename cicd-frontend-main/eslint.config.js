@@ -1,3 +1,5 @@
+import eslintPluginVue from 'eslint-plugin-vue';
+
 export default [
   {
     files: ['**/*.js', '**/*.vue'],
@@ -11,7 +13,7 @@ export default [
       },
     },
     plugins: {
-      vue: require('eslint-plugin-vue'),
+      vue: eslintPluginVue,
     },
     rules: {
       // Fügen Sie benutzerdefinierte Regeln hinzu, falls benötigt
