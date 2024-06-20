@@ -1,79 +1,51 @@
-pipeline {
-  agent any
+name: CI/CD Pipeline for Vue.js Project
 
-  options {
-    disableConcurrentBuilds()
-    timeout(time: 5, unit: 'MINUTES')
-  }
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch
 
-  environment {
-    NODE_ENV = "production"
-    dockerImage = ''
-    registry = 'eeba19/cicd-frontend'
-    AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
-    AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-    AWS_REGION = 'us-east-1'  // Replace with your AWS region
-    ECS_CLUSTER = 'your-ecs-cluster-name'
-    ECS_SERVICE = 'your-ecs-service-name'
-  }
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: production
+      DOCKER_REGISTRY: docker.io
+      DOCKER_IMAGE_NAME: eeba19/cicd-frontend
 
-  stages {
-    stage('SCM') {
-      steps {
-        checkout scm
-      }
-    }
-    stage('Linting') {
-      steps {
-        script {
-          def scannerHome = tool 'Sonarqube';
-          withSonarQubeEnv() {
-            sh "${scannerHome}/bin/sonar-scanner"
-          }
-        }
-      }
-    }
-    stage('Testing') {
-      steps {
-        script {
-          echo 'A/B Testing Stage'
-        }
-      }
-    }
-    stage('Build Docker Image') {
-      steps {
-        script {
-          dockerImage = docker.build registry
-        }
-      }
-    }
-    stage('Push Docker Image') {
-      steps {
-        script {
-          docker.withRegistry('https://registry.hub.docker.com', 'docker_hub') {
-            dockerImage.push("${env.BUILD_NUMBER}")
-            dockerImage.push("latest")
-          }
-        }
-      }
-    }
-    stage('Deploy App to ECS') {
-      steps {
-        script {
-          def awsCli = tool 'AWS-CLI'
-          withCredentials([[
-              $class: 'AmazonWebServicesCredentialsBinding',
-              accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-              credentialsId: 'aws-access-key-id',
-              secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-          ]]) {
-            sh """
-              \$(aws ecr get-login --no-include-email --region ${env.AWS_REGION})
-              aws ecs update-service --cluster ${env.ECS_CLUSTER} --service ${env.ECS_SERVICE} --force-new-deployment
-            """
-          }
-        }
-      }
-    }
-  }
-}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'  # Adjust Node.js version as needed
+
+      - name: Install dependencies
+        run: |
+          npm ci --legacy-peer-deps  # Use npm ci for clean installs
+          
+      - name: Linting
+        run: |
+          npm run lint  # Assumes you have eslint configured in your project
+
+      - name: Testing
+        run: |
+          echo 'Running tests...'  # Replace with your test command
+
+      - name: Build Docker Image
+        run: |
+          docker build -t $DOCKER_IMAGE_NAME .
+
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker tag $DOCKER_IMAGE_NAME $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME
+          docker push $DOCKER_REGISTRY/$DOCKER_IMAGE_NAME
+
+      - name: Deploy App
+        run: |
+          echo 'Deploying app...'  # Replace with your deployment commands
+
