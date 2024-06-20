@@ -1,90 +1,79 @@
-name: CI/CD Pipeline for Vue.js Project
+pipeline {
+  agent any
 
-on:
-  push:
-    branches:
-      - main
+  options {
+    disableConcurrentBuilds()
+    timeout(time: 5, unit: 'MINUTES')
+  }
 
-jobs:
-  lint:
-    name: Linting
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+  environment {
+    NODE_ENV = "production"
+    dockerImage = ''
+    registry = 'eeba19/cicd-frontend'
+    AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+    AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+    AWS_REGION = 'us-east-1'  // Replace with your AWS region
+    ECS_CLUSTER = 'your-ecs-cluster-name'
+    ECS_SERVICE = 'your-ecs-service-name'
+  }
 
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-
-      - name: Install Dependencies
-        working-directory: ./cicd-frontend-main
-        run: |
-          npm cache clean --force
-          rm -rf node_modules
-          npm install --legacy-peer-deps
-
-      - name: Run ESLint
-        working-directory: ./cicd-frontend-main
-        run: npx eslint 'src/**/*.{js,vue}'
-
-  test:
-    name: Testing
-    needs: lint  # Run tests only after linting succeeds
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-
-      - name: Install Dependencies
-        working-directory: ./cicd-frontend-main
-        run: |
-          npm cache clean --force
-          rm -rf node_modules
-          npm install --legacy-peer-deps
-
-      - name: Run Tests
-        working-directory: ./cicd-frontend-main
-        run: npm run test
-
-  build-and-deploy:
-    name: Build and Deploy
-    runs-on: ubuntu-latest
-    needs: test  # Deploy only after successful tests
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
-
-      - name: Install Dependencies
-        working-directory: ./cicd-frontend-main
-        run: |
-          npm cache clean --force
-          rm -rf node_modules
-          npm install --legacy-peer-deps
-
-      - name: Build Docker Image
-        run: |
-          docker build -t eeba19/cicd-frontend .
-          docker tag eeba19/cicd-frontend eeba19/cicd-frontend:${GITHUB_RUN_NUMBER}
-
-      - name: Push Docker Image
-        run: |
-          echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-          docker push eeba19/cicd-frontend:${GITHUB_RUN_NUMBER}
-          docker push eeba19/cicd-frontend:latest
-
-      - name: Deploy App
-        run: |
-          echo "Deploying app..."
-          # Add deployment steps as per your deployment strategy
+  stages {
+    stage('SCM') {
+      steps {
+        checkout scm
+      }
+    }
+    stage('Linting') {
+      steps {
+        script {
+          def scannerHome = tool 'Sonarqube';
+          withSonarQubeEnv() {
+            sh "${scannerHome}/bin/sonar-scanner"
+          }
+        }
+      }
+    }
+    stage('Testing') {
+      steps {
+        script {
+          echo 'A/B Testing Stage'
+        }
+      }
+    }
+    stage('Build Docker Image') {
+      steps {
+        script {
+          dockerImage = docker.build registry
+        }
+      }
+    }
+    stage('Push Docker Image') {
+      steps {
+        script {
+          docker.withRegistry('https://registry.hub.docker.com', 'docker_hub') {
+            dockerImage.push("${env.BUILD_NUMBER}")
+            dockerImage.push("latest")
+          }
+        }
+      }
+    }
+    stage('Deploy App to ECS') {
+      steps {
+        script {
+          def awsCli = tool 'AWS-CLI'
+          withCredentials([[
+              $class: 'AmazonWebServicesCredentialsBinding',
+              accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+              credentialsId: 'aws-access-key-id',
+              secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+          ]]) {
+            sh """
+              \$(aws ecr get-login --no-include-email --region ${env.AWS_REGION})
+              aws ecs update-service --cluster ${env.ECS_CLUSTER} --service ${env.ECS_SERVICE} --force-new-deployment
+            """
+          }
+        }
+      }
+    }
+  }
+}
