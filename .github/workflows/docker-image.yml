@@ -31,7 +31,7 @@ jobs:
 
       - name: Run ESLint
         working-directory: ./cicd-frontend-main
-        run: npx eslint --debug 'src/**/*.{js,vue}'
+        run: npx eslint 'src/**/*.{js,vue}'
 
   test:
     name: Testing
