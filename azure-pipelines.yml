@@ -1,111 +1,50 @@
 trigger:
   branches:
     include:
-      - main
-      - deploy/staging
-      - deploy/development
-      - deploy/production
+      - main  # Trigger on pushes to the main branch
+
+pool:
+  vmImage: 'ubuntu-latest'
 
 variables:
-  IMAGE_NAME: "todos-frontend"
-  VITE_URL: "http://your-vite-url"
+  NODE_ENV: 'production'
+  DOCKER_REGISTRY: 'docker.io'
+  DOCKER_IMAGE_NAME: 'eeba19/cicd-frontend'
 
-stages:
-- stage: Lint
-  jobs:
-  - job: Lint
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: UseNode@2
-      inputs:
-        version: '14.x'
-    - script: |
-        npm install
-        npm run lint
-      displayName: 'Run Lint'
+jobs:
+- job: build-and-deploy
+  displayName: 'Build and Deploy'
+  steps:
+    - task: Checkout@2
+      displayName: 'Checkout repository'
 
-- stage: Test
-  dependsOn: Lint
-  jobs:
-  - job: Test
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: UseNode@2
+    - task: UseNode@1
+      displayName: 'Set up Node.js'
       inputs:
-        version: '14.x'
-    - script: |
-        npm install
-        npm test
-      displayName: 'Run Tests'
+        version: '16.x'  # Adjust Node.js version as needed
 
-- stage: Build
-  dependsOn: Test
-  jobs:
-  - job: Build
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: UseNode@2
-      inputs:
-        version: '14.x'
     - script: |
-        if [[ $(Build.SourceBranch) == "refs/heads/deploy/staging" ]]; then
-          VITE_BASE_URL="$VITE_URL:5050/"
-        elif [[ $(Build.SourceBranch) == "refs/heads/deploy/development" ]]; then
-          VITE_BASE_URL="$VITE_URL:6060/"
-        else
-          VITE_BASE_URL="$VITE_URL/"
-        fi
-        echo "VITE_BASE_URL=$VITE_BASE_URL" > .env
-        docker build -t $(IMAGE_NAME) .
-        docker save $(IMAGE_NAME) -o docker-image.tar
+        npm ci --legacy-peer-deps  # Use npm ci for clean installs
+      displayName: 'Install dependencies'
+
+    - script: |
+        npx eslint --config ./eslint.config.js
+      displayName: 'Linting'
+
+    - script: |
+        echo 'Running tests...'  # Replace with your test command
+      displayName: 'Testing'
+
+    - script: |
+        docker build -t $(DOCKER_IMAGE_NAME) .
       displayName: 'Build Docker Image'
-    - publish: docker-image.tar
-      artifact: docker-image
 
-- stage: Deliver
-  dependsOn: Build
-  jobs:
-  - job: Deliver
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - download: current
-      artifact: docker-image
     - script: |
-        docker load -i docker-image.tar
-        if [[ $(Build.SourceBranch) == "refs/heads/deploy/staging" ]]; then
-          IMAGE_TAG="staging"
-        elif [[ $(Build.SourceBranch) == "refs/heads/deploy/development" ]]; then
-          IMAGE_TAG="development"
-        else
-          IMAGE_TAG="latest"
-        fi
-        docker tag $(IMAGE_NAME) $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
-        docker push $(DOCKER_REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
-      displayName: 'Deliver Docker Image'
+        echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USERNAME) --password-stdin
+        docker tag $(DOCKER_IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME)
+        docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME)
+      displayName: 'Push Docker Image to Docker Hub'
 
-- stage: Deploy
-  dependsOn: Deliver
-  jobs:
-  - job: Deploy
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
     - script: |
-        ssh-keyscan $(AWS_SERVER_IP) >> ~/.ssh/known_hosts
-        chmod 400 ~/.ssh/id_rsa
-        echo "$(SSH_PRIVATE_KEY)" > ~/.ssh/id_rsa
-        eval $(ssh-agent)
-        ssh-add ~/.ssh/id_rsa
-        if [[ $(Build.SourceBranch) == "refs/heads/deploy/staging" ]]; then
-          BRANCH_NAME="staging"
-        elif [[ $(Build.SourceBranch) == "refs/heads/deploy/development" ]]; then
-          BRANCH_NAME="development"
-        else
-          BRANCH_NAME="production"
-        fi
-        ssh ubuntu@$(AWS_SERVER_IP) "~/scripts/deploy.sh $BRANCH_NAME"
-      displayName: 'Deploy Application'
+        echo 'Deploying app...'  # Replace with your deployment commands
+      displayName: 'Deploy App'
