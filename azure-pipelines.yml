@@ -8,43 +8,45 @@ pool:
 
 variables:
   NODE_ENV: 'production'
-  DOCKER_REGISTRY: 'docker.io'
-  DOCKER_IMAGE_NAME: 'eeba19/cicd-frontend'
+  registry: 'eeba19/cicd-frontend'
+  dockerImage: ''
 
 jobs:
 - job: build-and-deploy
   displayName: 'Build and Deploy'
+  timeoutInMinutes: 5
   steps:
     - task: Checkout@2
       displayName: 'Checkout repository'
 
-    - task: UseNode@1
-      displayName: 'Set up Node.js'
-      inputs:
-        version: '16.x'  # Adjust Node.js version as needed
-
     - script: |
-        npm ci --legacy-peer-deps  # Use npm ci for clean installs
-      displayName: 'Install dependencies'
-
-    - script: |
-        npx eslint --config ./eslint.config.js
+        echo 'Running SonarQube analysis...'
+        scannerHome=$(which sonar-scanner)
+        sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.sources=. -Dsonar.host.url=http://your-sonarqube-server -Dsonar.login=$(SONARQUBE_TOKEN)
       displayName: 'Linting'
+      env:
+        SONARQUBE_TOKEN: $(SONARQUBE_TOKEN)  # Add SonarQube token to the Azure DevOps pipeline variables
 
     - script: |
-        echo 'Running tests...'  # Replace with your test command
+        echo 'A/B Testing Stage'
       displayName: 'Testing'
 
     - script: |
-        docker build -t $(DOCKER_IMAGE_NAME) .
+        dockerImage=$(docker build -t $(registry) .)
+        echo "##vso[task.setvariable variable=dockerImage]$dockerImage"
       displayName: 'Build Docker Image'
 
     - script: |
-        echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USERNAME) --password-stdin
-        docker tag $(DOCKER_IMAGE_NAME) $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME)
-        docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE_NAME)
+        echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USERNAME) --password-stdin https://registry.hub.docker.com
+        docker tag $(dockerImage) $(registry):$(Build.BuildId)
+        docker tag $(dockerImage) $(registry):latest
+        docker push $(registry):$(Build.BuildId)
+        docker push $(registry):latest
       displayName: 'Push Docker Image to Docker Hub'
+      env:
+        DOCKER_USERNAME: $(DOCKER_USERNAME)
+        DOCKER_PASSWORD: $(DOCKER_PASSWORD)
 
     - script: |
-        echo 'Deploying app...'  # Replace with your deployment commands
+        echo 'Deploying app...'
       displayName: 'Deploy App'
