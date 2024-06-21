@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - main  # Trigger nur bei Pushes auf den main Branch
+      - main
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -10,7 +10,6 @@ variables:
   NODE_ENV: 'production'
   registry: 'eeba19/cicd-frontend'
   dockerImage: ''
-  # Reference the variable group for Docker and SonarQube credentials
   DOCKER_USERNAME: $(DOCKER_USERNAME)
   DOCKER_PASSWORD: $(DOCKER_PASSWORD)
   SONARQUBE_TOKEN: $(SONARQUBE_TOKEN)
@@ -18,7 +17,8 @@ variables:
 jobs:
 - job: build_and_deploy
   displayName: 'Build and Deploy'
-  timeoutInMinutes: 5
+  timeoutInMinutes: 30  # Erhöhter Timeout für längere Pipeline
+
   steps:
     - checkout: self
       displayName: 'Checkout repository'
@@ -29,24 +29,23 @@ jobs:
         sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.sources=. -Dsonar.host.url=http://your-sonarqube-server -Dsonar.login=$(SONARQUBE_TOKEN)
       displayName: 'Linting'
       env:
-        SONARQUBE_TOKEN: $(SONARQUBE_TOKEN)  # Add SonarQube token to the Azure DevOps pipeline variables
+        SONARQUBE_TOKEN: $(SONARQUBE_TOKEN)
 
     - script: |
-        if [ -n "$(git diff --name-only HEAD^..HEAD | grep 'src/')" ]; then
-          echo 'Running tests...'
-          # Hier deine Testbefehle einfügen
-        else
-          echo 'No changes in src directory, skipping tests.'
-        fi
-      displayName: 'Conditional Testing'
+        echo 'Running tests...'
+        # Hier können deine Testbefehle eingefügt werden
+      displayName: 'Testing'
 
     - script: |
+        echo 'Building Docker image...'
         dockerImage=$(docker build -t $(registry) .)
         echo "##vso[task.setvariable variable=dockerImage]$dockerImage"
       displayName: 'Build Docker Image'
 
     - script: |
+        echo 'Logging in to Docker Hub...'
         echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USERNAME) --password-stdin https://registry.hub.docker.com
+        echo 'Tagging and pushing Docker image...'
         docker tag $(dockerImage) $(registry):$(Build.BuildId)
         docker tag $(dockerImage) $(registry):latest
         docker push $(registry):$(Build.BuildId)
@@ -58,4 +57,5 @@ jobs:
 
     - script: |
         echo 'Deploying app...'
+        # Hier können deine Bereitstellungsbefehle eingefügt werden
       displayName: 'Deploy App'
