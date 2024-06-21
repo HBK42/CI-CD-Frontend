@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - main  # Trigger on pushes to the main branch
+      - main  # Trigger nur bei Pushes auf den main Branch
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -32,8 +32,13 @@ jobs:
         SONARQUBE_TOKEN: $(SONARQUBE_TOKEN)  # Add SonarQube token to the Azure DevOps pipeline variables
 
     - script: |
-        echo 'A/B Testing Stage'
-      displayName: 'Testing'
+        if [ -n "$(git diff --name-only HEAD^..HEAD | grep 'src/')" ]; then
+          echo 'Running tests...'
+          # Hier deine Testbefehle einfügen
+        else
+          echo 'No changes in src directory, skipping tests.'
+        fi
+      displayName: 'Conditional Testing'
 
     - script: |
         dockerImage=$(docker build -t $(registry) .)
