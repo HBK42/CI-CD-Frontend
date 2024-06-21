@@ -12,7 +12,8 @@ variables:
 jobs:
 - job: build_and_deploy
   displayName: 'Build and Deploy'
-  timeoutInMinutes: 30
+  timeoutInMinutes: 60  # Erhöhe das Timeout auf 60 Minuten, falls die Pipeline länger dauert
+
   steps:
     - checkout: self
       displayName: 'Checkout repository'
